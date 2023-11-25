@@ -3,11 +3,62 @@
  */
 package TemaTest;
 
+
+import java.io.*;
+
 public class App {
     
-public App() {/* compiled code */}
+public App() {/* compiled code */
+}
 
     public static void main(java.lang.String[] strings) {
-        System.out.print("Hello world!");
+        if (strings[0].equals("-create-user") && strings.length == 3) {
+            String[] user = new String[2];
+            user = strings[1].split("'");
+            String[] password = new String[2];
+            password = strings[2].split("'");
+
+            if(!strings[1].startsWith("-u")) {
+                System.out.println("{'status':'error','message':'Please provide username'}");
+            } else {
+                if (!strings[2].startsWith("-p")) {
+                    System.out.println("{'status':'error','message':'Please provide password'}");
+                } else {
+                    int k = 0;
+                    try  {
+                        BufferedReader br = new BufferedReader(new FileReader("user.csv"));
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            String[] nume = new String[2];
+                            nume = line.split(" ");
+                            if (nume[0].equals(user[1])) {
+                                k = 1;
+                            }
+                        }
+                    } catch (IOException e) {
+                        k = 0;
+                    }
+                    if (k == 1) {
+                        System.out.println("{'status':'error','message':'User already exists'}");
+                    } else {
+                        try (FileWriter fw = new FileWriter("user.csv", true);
+                             BufferedWriter bw = new BufferedWriter(fw);
+                             PrintWriter out = new PrintWriter(bw)) {
+                            out.println(user[1] + " " + password[1]);
+                        } catch (IOException e) {
+                            System.out.println(e);
+                        }
+                        System.out.println("{'status':'ok','message':'User created successfully'}");
+                    }
+                }
+            }
+        }
+        if (strings.length == 1) {
+            System.out.println("{'status':'error','message':'Please provide username'}");
+        }
+        if (strings.length == 2) {
+            System.out.println("{'status':'error','message':'Please provide password'}");
+        }
+        //System.out.print("Hello world!");
     }
 }
