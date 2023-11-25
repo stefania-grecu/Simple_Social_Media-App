@@ -15,8 +15,7 @@ import java.util.Date;
 public class AppTest
 {
     @Test
-    public void testDummy()
-    {
+    public void testDummy() throws IOException {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         System.setOut(new PrintStream(bos));

@@ -25,18 +25,16 @@ public App() {/* compiled code */
                     System.out.println("{'status':'error','message':'Please provide password'}");
                 } else {
                     int k = 0;
-                    try  {
-                        BufferedReader br = new BufferedReader(new FileReader("user.csv"));
+                    try(BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                         String line;
                         while ((line = br.readLine()) != null) {
                             String[] nume = new String[2];
                             nume = line.split(" ");
                             if (nume[0].equals(user[1])) {
-                                //System.out.println(nume[0]);
-                                //System.out.println(user[1]);
                                 k = 1;
                             }
                         }
+                        br.close();
                     } catch (IOException e) {
                         k = 0;
                     }
@@ -51,6 +49,7 @@ public App() {/* compiled code */
                             System.out.println(e);
                         }
                         System.out.println("{'status':'ok','message':'User created successfully'}");
+
                     }
                 }
             }
@@ -62,5 +61,10 @@ public App() {/* compiled code */
             System.out.println("{'status':'error','message':'Please provide password'}");
         }
         //System.out.print("Hello world!");
+        if (strings[0].equals("-cleanup-all")) {
+            File myFile = new File("user.csv");
+            myFile.delete();
+        }
     }
+
 }
