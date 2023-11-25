@@ -14,9 +14,9 @@ public App() {/* compiled code */
     public static void main(java.lang.String[] strings) {
         if (strings[0].equals("-create-user") && strings.length == 3) {
             String[] user = new String[2];
-            user = strings[1].split("'");
+            user = strings[1].split(" ");
             String[] password = new String[2];
-            password = strings[2].split("'");
+            password = strings[2].split(" ");
 
             if(!strings[1].startsWith("-u")) {
                 System.out.println("{'status':'error','message':'Please provide username'}");
