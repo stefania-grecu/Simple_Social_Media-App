@@ -32,6 +32,8 @@ public App() {/* compiled code */
                             String[] nume = new String[2];
                             nume = line.split(" ");
                             if (nume[0].equals(user[1])) {
+                                //System.out.println(nume[0]);
+                                //System.out.println(user[1]);
                                 k = 1;
                             }
                         }
@@ -59,5 +61,6 @@ public App() {/* compiled code */
         if (strings.length == 2) {
             System.out.println("{'status':'error','message':'Please provide password'}");
         }
+        //System.out.print("Hello world!");
     }
 }
