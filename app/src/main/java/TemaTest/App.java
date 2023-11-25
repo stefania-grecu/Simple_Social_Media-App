@@ -69,49 +69,96 @@ public App() {/* compiled code */
             } else if (strings.length == 2) {
                 System.out.println("{'status':'error','message':'You need to be authenticated'}");
             } else if (!strings[1].startsWith("-u") || !strings[2].startsWith("-p")) {
-                        System.out.println("{'status':'error','message':'You need to be authenticated'}");
-                    } else {
+                System.out.println("{'status':'error','message':'You need to be authenticated'}");
+            } else {
+                String[] user = new String[2];
+                user = strings[1].split(" ");
+                String[] password = new String[2];
+                password = strings[2].split(" ");
 
-                        String[] user = new String[2];
-                        user = strings[1].split(" ");
-                        String[] password = new String[2];
-                        password = strings[2].split(" ");
+                int k = 0;
 
-                        int k = 0;
-
-                        try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                            String line;
-                            //System.out.println(user[1]);
-                           // System.out.println(password[1]);
-                            while ((line = br.readLine()) != null) {
-                                String[] nume = new String[2];
-                                nume = line.split(" ");
-                                if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                    k = 1;
-                                }
-                            }
-                        } catch (IOException e) {
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    //System.out.println(user[1]);
+                    // System.out.println(password[1]);
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
                         }
-                        if (k == 0) {
-                            System.out.println("{'status':'error','message':'Login failed'}");
+                    }
+                } catch (IOException e) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-t")) {
+                        System.out.println("{'status':'error','message':'No text provided'}");
+                    } else {
+                        String[] text = new String[2];
+                        text = strings[3].split("'");
+
+                        //System.out.println(text[1]);
+
+                        if (text[1].length() > 300) {
+                            System.out.println("{'status':'error','message':'Post text length exceeded'}");
                         } else {
-                            if (strings.length == 3 || !strings[3].startsWith("-t")) {
-                                System.out.println("{'status':'error','message':'No text provided'}");
-                            } else {
-                                String[] text = new String[2];
-                                text = strings[3].split("'");
-
-                                //System.out.println(text[1]);
-
-                                if (text[1].length() > 300) {
-                                    System.out.println("{'status':'error','message':'Post text length exceeded'}");
-                                } else {
-                                    System.out.println("{'status':'ok','message':'Post added successfully'}");
-                                }
-                            }
+                            System.out.println("{'status':'ok','message':'Post added successfully'}");
                         }
                     }
                 }
+            }
+        }
+
+        //delete-post-by-id
+        if (strings[0].equals("-delete-post-by-id")) {
+            if (strings.length == 1) {
+                System.out.println("{'status':'error','message':'You need to be authenticated'}");
+            } else if (strings.length == 2) {
+                System.out.println("{'status':'error','message':'You need to be authenticated'}");
+            } else if (!strings[1].startsWith("-u") || !strings[2].startsWith("-p")) {
+                System.out.println("{'status':'error','message':'You need to be authenticated'}");
+            } else {
+                String[] user = new String[2];
+                user = strings[1].split(" ");
+                String[] password = new String[2];
+                password = strings[2].split(" ");
+
+                int k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException e) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-id")) {
+                        System.out.println("{'status':'error','message':'No identifier was provided'}");
+                    } else {
+                        String[] id = new String[2];
+                        id = strings[3].split("'");
+
+                        //System.out.println(text[1]);
+
+                        if (id[1].length() > 300) {
+                            System.out.println("{'status':'error','message':'Post text length exceeded'}");
+                        } else {
+                            System.out.println("{'status':'ok','message':'Post deleted successfully'}");
+                        }
+                    }
+                }
+            }
+        }
 
         //-cleanup-all
         if (strings[0].equals("-cleanup-all")) {
