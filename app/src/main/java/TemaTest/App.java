@@ -68,8 +68,6 @@ public App() {/* compiled code */
                 System.out.println("{'status':'error','message':'You need to be authenticated'}");
             } else if (strings.length == 2) {
                 System.out.println("{'status':'error','message':'You need to be authenticated'}");
-            } else if (strings.length == 3) {
-                System.out.println("{'status':'error','message':'Login failed'}");
             } else if (!strings[1].startsWith("-u") || !strings[2].startsWith("-p")) {
                         System.out.println("{'status':'error','message':'You need to be authenticated'}");
                     } else {
@@ -83,20 +81,21 @@ public App() {/* compiled code */
 
                         try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                             String line;
+                            //System.out.println(user[1]);
+                           // System.out.println(password[1]);
                             while ((line = br.readLine()) != null) {
                                 String[] nume = new String[2];
                                 nume = line.split(" ");
-                                if (!nume[0].equals(user[1]) && !nume[1].equals(password[1])) {
+                                if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
                                     k = 1;
                                 }
                             }
                         } catch (IOException e) {
-                            k = 0;
                         }
-                        if (k == 1) {
+                        if (k == 0) {
                             System.out.println("{'status':'error','message':'Login failed'}");
                         } else {
-                            if (!strings[3].startsWith("-t")) {
+                            if (strings.length == 3 || !strings[3].startsWith("-t")) {
                                 System.out.println("{'status':'error','message':'No text provided'}");
                             } else {
                                 String[] text = new String[2];
