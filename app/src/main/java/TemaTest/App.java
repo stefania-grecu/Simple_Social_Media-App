@@ -59,6 +59,5 @@ public App() {/* compiled code */
         if (strings.length == 2) {
             System.out.println("{'status':'error','message':'Please provide password'}");
         }
-        //System.out.print("Hello world!");
     }
 }
