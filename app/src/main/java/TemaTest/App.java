@@ -3,12 +3,8 @@
  */
 package TemaTest;
 
-
-import com.jogamp.common.util.Bitfield;
-
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class App {
     static ArrayList<Utilizator> userName;
