@@ -210,7 +210,7 @@ public App() {/* compiled code */
                                 }
                             }
                         }
-                        if(ok == false)
+                        if(!ok)
                             System.out.println("{'status':'error','message':'The identifier was not valid'}");
                     }
                 }
@@ -263,8 +263,10 @@ public App() {/* compiled code */
                         } catch (IOException ignored) {
                         }
                         for (String i : utilizator.urmareste) {
-                            if(i.equals(userFollow[1]))
+                            if (i.equals(userFollow[1])) {
                                 ok = 0;
+                                break;
+                            }
                         }
                         if (ok == 0)
                             System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
