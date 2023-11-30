@@ -328,6 +328,86 @@ public App() {/* compiled code */
             }
         }
 
+        //-like-post
+        if (strings[0].equals("-like-post")) {
+            if (strings.length <= 2 || !strings[1].startsWith("-u") || !strings[2].startsWith("-p"))
+                System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            else {
+                String[] user = new String[2];
+                user = strings[1].split(" ");
+                String[] password = new String[2];
+                password = strings[2].split(" ");
+
+                int k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-post-id")) {
+                        System.out.println("{'status':'error','message':'No post identifier to like was provided'}");
+                    } else {
+                        String[] id = strings[3].split(" ");
+                        int ok = 0;
+                        String[] idInt = id[1].split("'");
+                        int index = Integer.parseInt(idInt[1]);
+                        boolean conter = false;
+
+                        for (Utilizator i : userName) {
+                            if (i.getNume().equals(user[1])) {
+                                for (Postare j : i.postare) {
+                                    System.out.println("user:" + i.getNume() + "id postare:" + j.getId());
+                                    if (j.getId() == index) {
+                                        ok = 1;
+                                        break;
+                                    }
+                                }
+                                for (String j : i.like) {
+                                    if (j.equals(id[1])) {
+                                        ok = 1;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (ok == 0) {
+                            for (Utilizator i : userName) {
+                                if (!i.getNume().equals(user[1])) {
+                                    for (Postare j : i.postare) {
+                                        if (j.getId() == index) {
+                                            conter = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (conter) {
+                            for (Utilizator i : userName) {
+                                if (i.getNume().equals(user[1])) {
+                                    i.adaugaLike(id[1]);
+                                }
+                            }
+                            System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+                        } else {
+                            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
+                        }
+                    }
+                }
+            }
+        }
+
         //-cleanup-all
         if (strings[0].equals("-cleanup-all")) {
             for (Utilizator i : userName) {
@@ -335,6 +415,8 @@ public App() {/* compiled code */
                     i.postare.clear();
                 if (i.urmareste != null)
                     i.urmareste.clear();
+                if (i.like != null)
+                    i.like.clear();
             }
             if(userName != null)
                 userName.clear();
