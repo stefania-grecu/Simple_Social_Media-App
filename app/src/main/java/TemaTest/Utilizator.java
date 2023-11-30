@@ -11,7 +11,7 @@ public class Utilizator {
         this.user = user;
         this.password = password;
         postare = new ArrayList<Postare>();
-        urmareste = new ArrayList<>();
+        urmareste = new ArrayList<String>();
     }
     public String getNume() {
         return user;
