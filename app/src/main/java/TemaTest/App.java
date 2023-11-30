@@ -10,6 +10,7 @@ import java.util.Iterator;
 
 public class App {
     static ArrayList<Utilizator> userName;
+    int idOld = 0;
 
 public App() {/* compiled code */
     if (userName == null)
@@ -25,8 +26,8 @@ public App() {/* compiled code */
             String password = i.getPassword();
             if (nume.equals(user.getNume()) && password.equals(user.getPassword())) {
                 Postare post = new Postare(text);
-                //i.adaugaPostare(post);
-                System.out.println("{'status':'ok','message':'Post added successfully'}");
+                i.adaugaPostare(post);
+                //System.out.println("id:" + post.getId());
                 return;
             }
         }
@@ -126,14 +127,6 @@ public App() {/* compiled code */
                         } else {
                             Utilizator utilizator = new Utilizator(user[1], password[1]);
                             app.adaugaPostare(utilizator, text[1]);
-//                            for (Utilizator i : userName) {
-//                                System.out.println(i.getNume());
-//                                if (user[1].equals(i.getNume())) {
-//                                    for (Postare j : i.postare) {
-//                                        System.out.println(j.getId());
-//                                    }
-//                                }
-//                            }
                             System.out.println("{'status':'ok','message':'Post added successfully'}");
                         }
                     }
@@ -141,7 +134,7 @@ public App() {/* compiled code */
             }
         }
 
-//        //delete-post-by-id
+        //delete-post-by-id
         if (strings[0].equals("-delete-post-by-id")) {
             if (strings.length == 1) {
                 System.out.println("{'status':'error','message':'You need to be authenticated'}");
@@ -179,29 +172,15 @@ public App() {/* compiled code */
 
                         boolean ok = false;
                         Utilizator utilizator = new Utilizator(user[1], password[1]);
-//                        System.out.println(ok);
-//
-//                        for (Postare i : utilizator.postare) {
-//                            System.out.println(ok);
-//                            String x = String.valueOf(i.getId());
-//                            System.out.println(i.getId());
-//                            if (x.equals(id[1])) {
-//                                utilizator.postare.remove(Integer.parseInt(id[1]));
-//                                System.out.println("{'status':'ok','message':'Post deleted successfully'}");
-//                                ok = true;
-//                                break;
-//                            }
-//                        }
-                        System.out.println(ok);
 
                         for (Utilizator i : userName) {
-                            System.out.println(i.getNume());
                             if (user[1].equals(i.getNume())) {
                                 for (Postare j : i.postare) {
                                     String x = String.valueOf(j.getId());
-                                    System.out.println(j.getId());
+
                                     if (x.equals(id[1])) {
-                                        utilizator.postare.remove(Integer.parseInt(id[1]));
+                                        int index = Integer.parseInt(id[1]);
+                                        //i.postare.remove(index);
                                         System.out.println("{'status':'ok','message':'Post deleted successfully'}");
                                         ok = true;
                                         break;
@@ -219,7 +198,7 @@ public App() {/* compiled code */
 
         //-follow-user-by-username
         if (strings[0].equals("-follow-user-by-username")) {
-            if (strings.length <= 2 || strings[1].startsWith("-u") || strings[2].startsWith("-p"))
+            if (strings.length <= 2 || !strings[1].startsWith("-u") || !strings[2].startsWith("-p"))
                 System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
             else {
                 String[] user = new String[2];
@@ -251,6 +230,7 @@ public App() {/* compiled code */
                         String[] userFollow = new String[3];
                         userFollow = strings[3].split(" ");
                         int ok = 0;
+                        System.out.println("ok1:" + ok);
                         try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                             String line;
                             while ((line = br.readLine()) != null) {
@@ -262,16 +242,44 @@ public App() {/* compiled code */
                             }
                         } catch (IOException ignored) {
                         }
-                        for (String i : utilizator.urmareste) {
-                            if (i.equals(userFollow[1])) {
-                                ok = 0;
-                                break;
+                        System.out.println("ok2:" + ok);
+                        System.out.println("userfollow" + userFollow[1]);
+
+                        System.out.println("user1:" + user[1]);
+
+                        for (Utilizator i : userName) {
+                            if (i.getNume().equals(user[1])) {
+                                System.out.println("oooo");
+                                if(i.urmareste == null)
+                                    System.out.println("vector null");
+                                System.out.println(i.urmareste);
+                                for (String j : i.urmareste) {
+                                    if (j ==  null)
+                                        System.out.println("null");
+                                    System.out.println("follow" + j);
+                                    if(j.equals(userFollow[1]))
+                                        ok = 0;
+                                    break;
+                                }
                             }
                         }
+
+//                        for (String i : utilizator.urmareste) {
+//                            System.out.println("ok");
+//                            if (i.equals(userFollow[1])) {
+//                                ok = 0;
+//                                break;
+//                            }
+//                        }
+                        System.out.println("ok3:" + ok);
                         if (ok == 0)
                             System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
                         else {
                             utilizator.adaugaUrmareste(userFollow[1]);
+//                            System.out.println(utilizator.getNume());
+//                            for (String i : utilizator.urmareste)
+//                                System.out.println(i);
+                            System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                         }
                     }
                 }
@@ -280,9 +288,12 @@ public App() {/* compiled code */
 
         //-cleanup-all
         if (strings[0].equals("-cleanup-all")) {
-            for (Utilizator i : userName)
+            for (Utilizator i : userName) {
                 if (i.postare != null)
                     i.postare.clear();
+                if (i.urmareste != null)
+                    i.urmareste.clear();
+            }
             if(userName != null)
                 userName.clear();
 
