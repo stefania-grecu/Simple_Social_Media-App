@@ -169,7 +169,6 @@ public App() {/* compiled code */
                         id = strings[3].split("'");
 
                         boolean ok = false;
-                        //Utilizator utilizator = new Utilizator(user[1], password[1]);
 
                         for (Utilizator i : userName) {
                             if (user[1].equals(i.getNume())) {
@@ -222,7 +221,7 @@ public App() {/* compiled code */
                     if (strings.length == 3 || !strings[3].startsWith("-username")) {
                         System.out.println("{'status':'error','message':'No username to follow was provided'}");
                     } else {
-                        String[] userFollow = new String[3];
+                        String[] userFollow = new String[2];
                         userFollow = strings[3].split(" ");
                         int ok = 0;
 
@@ -258,6 +257,72 @@ public App() {/* compiled code */
                             }
                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                         }
+                    }
+                }
+            }
+        }
+
+        //-unfollow-user-by-username
+        if (strings[0].equals("-unfollow-user-by-username")) {
+            if (strings.length <= 2 || !strings[1].startsWith("-u") || !strings[2].startsWith("-p"))
+                System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            else {
+                String[] user = new String[2];
+                user = strings[1].split(" ");
+                String[] password = new String[2];
+                password = strings[2].split(" ");
+
+                int k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-username")) {
+                        System.out.println("{'status':'error','message':'No username to unfollow was provided'}");
+                    } else {
+                        String[] userUnfollow = new String[2];
+                        userUnfollow = strings[3].split(" ");
+
+                        int ok = 0;
+                        boolean contor = false;
+
+                        try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                            String line;
+                            while ((line = br.readLine()) != null) {
+                                String[] nume = new String[2];
+                                nume = line.split(" ");
+                                if (nume[0].equals(userUnfollow[1])) {
+                                    ok = 1;
+                                }
+                            }
+                        } catch (IOException ignored) {
+                        }
+
+                        for (Utilizator i : userName) {
+                            if (i.getNume().equals(user[1])) {
+                                for (String j : i.urmareste) {
+                                    if (j.equals(userUnfollow[1])) {
+                                        i.stergereUrmareste(userUnfollow[1]);
+                                        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+                                        contor = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!contor)
+                            System.out.println("{ 'status' : 'error', 'message' : 'The username to unfollow was not valid'}");
                     }
                 }
             }

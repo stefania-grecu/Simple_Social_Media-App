@@ -26,4 +26,7 @@ public class Utilizator {
     public void adaugaUrmareste(String urm) {
         urmareste.add(urm);
     }
+    public void stergereUrmareste(String urm) {
+        urmareste.remove(urm);
+    }
 }
