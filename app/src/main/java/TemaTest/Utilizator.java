@@ -25,6 +25,9 @@ public class Utilizator {
         post.idPostare();
         postare.add(post);
     }
+    public void stergerePostare(Postare post) {
+        postare.remove(post);
+    }
     public void adaugaUrmareste(String urm) {
         urmareste.add(urm);
     }
@@ -33,5 +36,8 @@ public class Utilizator {
     }
     public void adaugaLike (String likeId) {
         like.add(likeId);
+    }
+    public void stergereLike (String likeId) {
+        like.remove(likeId);
     }
 }
