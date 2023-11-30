@@ -2,9 +2,10 @@ package TemaTest;
 
 public class Postare {
     int id;
+    private static int idOld = 0;
     String text;
     public Postare(String text) {
-        this.id = 0;
+        this.id = ++idOld;
         this.text = text;
     }
     public int getId() {

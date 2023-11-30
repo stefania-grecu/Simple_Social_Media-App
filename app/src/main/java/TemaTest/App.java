@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class App {
-
-    private static ArrayList<Utilizator> userName;
+    static ArrayList<Utilizator> userName;
 
 public App() {/* compiled code */
     if (userName == null)
@@ -26,7 +25,9 @@ public App() {/* compiled code */
             String password = i.getPassword();
             if (nume.equals(user.getNume()) && password.equals(user.getPassword())) {
                 Postare post = new Postare(text);
-                i.adaugaPost(post);
+                //i.adaugaPostare(post);
+                System.out.println("{'status':'ok','message':'Post added successfully'}");
+                return;
             }
         }
     }
@@ -75,8 +76,7 @@ public App() {/* compiled code */
                                  BufferedWriter bw = new BufferedWriter(fw);
                                  PrintWriter out = new PrintWriter(bw)) {
                                 out.println(user[1] + " " + password[1]);
-                            } catch (IOException e) {
-                                System.out.println("error");
+                            } catch (IOException ignored) {
                             }
                             System.out.println("{'status':'ok','message':'User created successfully'}");
                         }
@@ -110,13 +110,12 @@ public App() {/* compiled code */
                             k = 1;
                         }
                     }
-                } catch (IOException e) {
-                    System.out.println("error");
+                } catch (IOException ignored) {
                 }
                 if (k == 0) {
                     System.out.println("{'status':'error','message':'Login failed'}");
                 } else {
-                    if (strings.length == 3 || !strings[3].startsWith("-t")) {
+                    if (strings.length == 3 || !strings[3].startsWith("-text")) {
                         System.out.println("{'status':'error','message':'No text provided'}");
                     } else {
                         String[] text = new String[2];
@@ -127,6 +126,14 @@ public App() {/* compiled code */
                         } else {
                             Utilizator utilizator = new Utilizator(user[1], password[1]);
                             app.adaugaPostare(utilizator, text[1]);
+//                            for (Utilizator i : userName) {
+//                                System.out.println(i.getNume());
+//                                if (user[1].equals(i.getNume())) {
+//                                    for (Postare j : i.postare) {
+//                                        System.out.println(j.getId());
+//                                    }
+//                                }
+//                            }
                             System.out.println("{'status':'ok','message':'Post added successfully'}");
                         }
                     }
@@ -159,8 +166,7 @@ public App() {/* compiled code */
                             k = 1;
                         }
                     }
-                } catch (IOException e) {
-                    System.out.println("error");
+                } catch (IOException ignored) {
                 }
                 if (k == 0) {
                     System.out.println("{'status':'error','message':'Login failed'}");
@@ -173,15 +179,35 @@ public App() {/* compiled code */
 
                         boolean ok = false;
                         Utilizator utilizator = new Utilizator(user[1], password[1]);
+//                        System.out.println(ok);
+//
+//                        for (Postare i : utilizator.postare) {
+//                            System.out.println(ok);
+//                            String x = String.valueOf(i.getId());
+//                            System.out.println(i.getId());
+//                            if (x.equals(id[1])) {
+//                                utilizator.postare.remove(Integer.parseInt(id[1]));
+//                                System.out.println("{'status':'ok','message':'Post deleted successfully'}");
+//                                ok = true;
+//                                break;
+//                            }
+//                        }
+                        System.out.println(ok);
 
-                        for (Postare i : utilizator.postare) {
-                            String x = String.valueOf(i.getId());
-                            System.out.println(i.getId());
-                            if (x.equals(id[1])) {
-                                utilizator.postare.remove(Integer.parseInt(id[1]));
-                                System.out.println("{'status':'ok','message':'Post deleted successfully'}");
-                                ok = true;
-                                break;
+                        for (Utilizator i : userName) {
+                            System.out.println(i.getNume());
+                            if (user[1].equals(i.getNume())) {
+                                for (Postare j : i.postare) {
+                                    String x = String.valueOf(j.getId());
+                                    System.out.println(j.getId());
+                                    if (x.equals(id[1])) {
+                                        utilizator.postare.remove(Integer.parseInt(id[1]));
+                                        System.out.println("{'status':'ok','message':'Post deleted successfully'}");
+                                        ok = true;
+                                        break;
+                                    }
+                                    System.out.println(j.getId());
+                                }
                             }
                         }
                         if(ok == false)
@@ -191,10 +217,73 @@ public App() {/* compiled code */
             }
         }
 
+        //-follow-user-by-username
+        if (strings[0].equals("-follow-user-by-username")) {
+            if (strings.length <= 2 || strings[1].startsWith("-u") || strings[2].startsWith("-p"))
+                System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            else {
+                String[] user = new String[2];
+                user = strings[1].split(" ");
+                String[] password = new String[2];
+                password = strings[2].split(" ");
+
+                Utilizator utilizator = new Utilizator(user[1], password[1]);
+
+                int k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-username")) {
+                        System.out.println("{'status':'error','message':'No username to follow was provided'}");
+                    } else {
+                        String[] userFollow = new String[3];
+                        userFollow = strings[3].split(" ");
+                        int ok = 0;
+                        try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                            String line;
+                            while ((line = br.readLine()) != null) {
+                                String[] nume = new String[2];
+                                nume = line.split(" ");
+                                if (nume[0].equals(userFollow[1])) {
+                                    ok = 1;
+                                }
+                            }
+                        } catch (IOException ignored) {
+                        }
+                        for (String i : utilizator.urmareste) {
+                            if(i.equals(userFollow[1]))
+                                ok = 0;
+                        }
+                        if (ok == 0)
+                            System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
+                        else {
+                            utilizator.adaugaUrmareste(userFollow[1]);
+                        }
+                    }
+                }
+            }
+        }
+
         //-cleanup-all
         if (strings[0].equals("-cleanup-all")) {
+            for (Utilizator i : userName)
+                if (i.postare != null)
+                    i.postare.clear();
             if(userName != null)
                 userName.clear();
+
             File myFile = new File("user.csv");
             myFile.delete();
         }
