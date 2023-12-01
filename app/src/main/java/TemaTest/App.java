@@ -3,8 +3,6 @@
  */
 package TemaTest;
 
-import com.jogamp.common.util.Bitfield;
-
 import java.io.*;
 import java.util.ArrayList;
 
