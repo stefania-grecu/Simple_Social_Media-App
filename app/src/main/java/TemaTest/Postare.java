@@ -6,7 +6,7 @@ public class Postare {
     int id;
     int like;
     String text;
-    ArrayList<String> comentariu;
+    ArrayList<Comentariu> comentariu;
     public Postare(String text) {
         this.id = 0;
         this.like = 0;
@@ -20,10 +20,11 @@ public class Postare {
         id++;
     }
 
-    public void adaugaComentariu(String text) {
-        comentariu.add(text);
+    public void adaugaComentariu(Comentariu com) {
+        com.idComentariu();
+        comentariu.add(com);
     }
-    public void stergereComentariu(String comId) {
-        comentariu.remove(comId);
+    public void stergereComentariu(Comentariu com) {
+        comentariu.remove(com);
     }
 }

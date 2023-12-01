@@ -42,12 +42,17 @@ public class App {
         //-cleanup-all
         if (strings[0].equals("-cleanup-all")) {
             for (Utilizator i : userName) {
+                for (Postare j : i.postare)
+                    if(j.comentariu != null)
+                        j.comentariu.clear();
                 if (i.postare != null)
                     i.postare.clear();
                 if (i.urmareste != null)
                     i.urmareste.clear();
                 if (i.like != null)
                     i.like.clear();
+                if (i.comentariu != null)
+                    i.comentariu.clear();
             }
             if (userName != null)
                 userName.clear();
@@ -478,7 +483,11 @@ public class App {
                             for (Utilizator i : userName)
                                 for (Postare j : i.postare)
                                     if (j.getId() == index) {
-                                        j.adaugaComentariu(text[1]);
+                                        Comentariu com = new Comentariu(text[1]);
+                                        j.adaugaComentariu(com);
+                                        for (Utilizator l : userName)
+                                            if (l.getNume().equals(user[1]))
+                                                l.adaugaComentariu(com);
                                         System.out.println("{ 'status' : 'ok', 'message' : 'Comment added successfully'}");
                                         break;
                                     }
@@ -512,14 +521,39 @@ public class App {
                 if (k == 0) {
                     System.out.println("{'status':'error','message':'Login failed'}");
                 } else {
-                    if (strings.length <= 3 || !strings[3].startsWith("-post-id")) {
+                    if (strings.length <= 3 || !strings[3].startsWith("-id")) {
                         System.out.println("{'status':'error','message':'No identifier was provided'}");
                     } else {
                         String[] id = strings[3].split(" ");
+                        ok = 0;
+                        String[] idInt = id[1].split("'");
+                        int index = Integer.parseInt(idInt[1]);
 
-                        for (Utilizator i : userName)
-                            if (i.getNume().equals(user[1])) ;
-                        //for (String)
+                        for (Utilizator i : userName) {
+                            if (i.getNume().equals(user[1])) {
+                                for (Postare j : i.postare) {
+                                    for (Comentariu l : j.comentariu) {
+                                        if (l.getId() == index) {
+                                            j.stergereComentariu(l);
+                                            System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
+                                            ok = 1;
+                                            break;
+                                        }
+                                    }
+                                }
+                                for (Comentariu j : i.comentariu) {
+                                    if (j.getId() == index) {
+                                        i.stergereComentariu(j);
+                                        System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
+                                        ok = 1;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if(ok == 0)
+                            System.out.println("{'status':'error','message':'The identifier was not valid'}");
                     }
                 }
             }
