@@ -6,7 +6,7 @@ public class Utilizator {
     private String user, password;
     ArrayList<Postare> postare;
     ArrayList<String> urmareste;
-    ArrayList<String> like;
+    ArrayList<String> likePostare, likeComentariu;
     ArrayList<Comentariu> comentariu;
 
     public Utilizator(String user, String password) {
@@ -14,7 +14,8 @@ public class Utilizator {
         this.password = password;
         postare = new ArrayList<Postare>();
         urmareste = new ArrayList<String>();
-        like = new ArrayList<String>();
+        likePostare = new ArrayList<String>();
+        likeComentariu = new ArrayList<String>();
         comentariu = new ArrayList<Comentariu>();
 
     }
@@ -37,16 +38,22 @@ public class Utilizator {
     public void stergereUrmareste(String urm) {
         urmareste.remove(urm);
     }
-    public void adaugaLike (String likeId) {
-        like.add(likeId);
+    public void adaugaLikePostare (String likeId) {
+        likePostare.add(likeId);
     }
-    public void stergereLike (String likeId) {
-        like.remove(likeId);
+    public void stergereLikePostare (String likeId) {
+        likePostare.remove(likeId);
     }
     public void adaugaComentariu (Comentariu com) {
         comentariu.add(com);
     }
     public void stergereComentariu (Comentariu com) {
         comentariu.remove(com);
+    }
+    public void adaugaLikeComentariu (String likeId) {
+        likeComentariu.add(likeId);
+    }
+    public void stergereLikeComentariu (String likeId) {
+        likeComentariu.remove(likeId);
     }
 }

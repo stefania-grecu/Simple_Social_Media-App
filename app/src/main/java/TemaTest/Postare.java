@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class Postare {
     int id;
-    int like;
     String text;
     ArrayList<Comentariu> comentariu;
+    ArrayList<String> like;
     public Postare(String text) {
         this.id = 0;
-        this.like = 0;
         this.text = text;
         comentariu = new ArrayList<>();
+        like = new ArrayList<String>();
     }
     public int getId() {
         return id;
@@ -26,5 +26,11 @@ public class Postare {
     }
     public void stergereComentariu(Comentariu com) {
         comentariu.remove(com);
+    }
+    public void adaugaLike(String user) {
+        like.add(user);
+    }
+    public void stergeLike(String user) {
+        like.remove(user);
     }
 }

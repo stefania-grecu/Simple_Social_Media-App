@@ -3,6 +3,8 @@
  */
 package TemaTest;
 
+import com.jogamp.common.util.Bitfield;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -42,17 +44,22 @@ public class App {
         //-cleanup-all
         if (strings[0].equals("-cleanup-all")) {
             for (Utilizator i : userName) {
-                for (Postare j : i.postare)
-                    if(j.comentariu != null)
+                for (Postare j : i.postare) {
+                    if (j.comentariu != null)
                         j.comentariu.clear();
+                    if (j.like != null)
+                        j.like.clear();
+                }
                 if (i.postare != null)
                     i.postare.clear();
                 if (i.urmareste != null)
                     i.urmareste.clear();
-                if (i.like != null)
-                    i.like.clear();
+                if (i.likePostare != null)
+                    i.likePostare.clear();
                 if (i.comentariu != null)
                     i.comentariu.clear();
+                if (i.likeComentariu != null)
+                    i.likeComentariu.clear();
             }
             if (userName != null)
                 userName.clear();
@@ -364,7 +371,7 @@ public class App {
                                         break;
                                     }
                                 }
-                                for (String j : i.like) {
+                                for (String j : i.likePostare) {
                                     if (j.equals(id[1])) {
                                         ok = 1;
                                         break;
@@ -388,7 +395,7 @@ public class App {
                         if (conter) {
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
-                                    i.adaugaLike(id[1]);
+                                    i.adaugaLikePostare(id[1]);
                                 }
                             }
                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
@@ -428,9 +435,9 @@ public class App {
 
                         for (Utilizator i : userName) {
                             if (i.getNume().equals(user[1])) {
-                                for (String j : i.like) {
+                                for (String j : i.likePostare) {
                                     if (j.equals(id[1])) {
-                                        i.stergereLike(id[1]);
+                                        i.stergereLikePostare(id[1]);
                                         ok = 1;
                                         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                                         break;
@@ -560,12 +567,10 @@ public class App {
 
             //-like-comment
             if (strings[0].equals("-like-comment")) {
-                String[] user = new String[2];
                 user = strings[1].split(" ");
-                String[] password = new String[2];
                 password = strings[2].split(" ");
 
-                int k = 0;
+                k = 0;
 
                 try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                     String line;
@@ -581,17 +586,104 @@ public class App {
                 if (k == 0) {
                     System.out.println("{'status':'error','message':'Login failed'}");
                 } else {
-                    if (strings.length == 3 || !strings[3].startsWith("-post-id")) {
+                    if (strings.length == 3 || !strings[3].startsWith("-comment-id")) {
                         System.out.println("{'status':'error','message':'No comment identifier to like was provided'}");
                     } else {
                         String[] id = strings[3].split(" ");
                         int ok = 0;
+                        String[] idInt = id[1].split("'");
+                        int index = Integer.parseInt(idInt[1]);
+                        boolean conter = false;
 
                         for (Utilizator i : userName) {
                             if (i.getNume().equals(user[1])) {
-                                for (String j : i.like) {
+                                for (Comentariu j : i.comentariu) {
+                                    if (j.getId() == index) {
+                                        ok = 1;
+                                        break;
+                                    }
+                                }
+                                for (String j : i.likeComentariu) {
                                     if (j.equals(id[1])) {
-                                        i.stergereLike(id[1]);
+                                        ok = 1;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (ok == 0) {
+                            for (Utilizator i : userName) {
+                                if (!i.getNume().equals(user[1])) {
+                                    for (Postare j : i.postare) {
+                                        for (Comentariu l : j.comentariu)
+                                            if (j.getId() == index) {
+                                                conter = true;
+                                                break;
+                                            }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (conter) {
+                            for (Utilizator i : userName) {
+                                if (i.getNume().equals(user[1])) {
+                                    i.adaugaLikeComentariu(id[1]);
+                                } else {
+                                    for (Postare j : i.postare)
+                                        for (Comentariu l: j.comentariu)
+                                            if (l.getId() == index)
+                                                j.adaugaLike(user[1]);
+                                }
+                            }
+                            System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+                        } else {
+                            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
+                        }
+                    }
+                }
+            }
+
+            //-unlike-comment
+            if (strings[0].equals("-unlike-comment")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-comment-id")) {
+                        System.out.println("{'status':'error','message':'No comment identifier to unlike was provided'}");
+                    } else {
+                        String[] id = strings[3].split(" ");
+                        String[] idInt = id[1].split("'");
+                        int index = Integer.parseInt(idInt[1]);
+                        ok = 0;
+
+                        for (Utilizator i : userName) {
+                            if (i.getNume().equals(user[1])) {
+                                for (String j : i.likeComentariu) {
+                                    if (j.equals(id[1])) {
+                                        i.stergereLikeComentariu(id[1]);
+                                        for (Utilizator u : userName)
+                                            if (!u.getNume().equals(user[1]))
+                                                for (Postare t : u.postare)
+                                                    for (Comentariu v : t.comentariu)
+                                                        if (v.getId() == index)
+                                                            t.stergeLike(user[1]);
                                         ok = 1;
                                         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                                         break;
@@ -601,7 +693,7 @@ public class App {
                         }
 
                         if (ok == 0)
-                            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to unlike was not valid'}");
+                            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to unlike was not valid'}");
                     }
                 }
             }
