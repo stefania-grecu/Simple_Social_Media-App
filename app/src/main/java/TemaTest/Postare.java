@@ -40,6 +40,9 @@ public class Postare {
     public String getData() {
         return currentDateAsString;
     }
+    public int getNrLike() {
+        return like.size();
+    }
 
     public String toString() {
         return super.toString();

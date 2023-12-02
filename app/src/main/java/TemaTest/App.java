@@ -40,7 +40,8 @@ public class App {
                     if (j.like != null)
                         j.like.clear();
                 }
-                i.postare.clear();
+                if (i.postare != null)
+                    i.postare.clear();
                 if (i.urmareste != null)
                     i.urmareste.clear();
                 if (i.likePostare != null)
@@ -373,12 +374,14 @@ public class App {
                                 }
                             }
                         }
+                        Postare post = null;
                         if (ok == 0) {
                             for (Utilizator i : userName) {
                                 if (!i.getNume().equals(user[1])) {
                                     for (Postare j : i.postare) {
                                         if (j.getId() == index) {
                                             conter = true;
+                                            post = j;
                                             break;
                                         }
                                     }
@@ -390,6 +393,7 @@ public class App {
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     i.adaugaLikePostare(id[1]);
+                                    post.adaugaLike(user[1]);
                                 }
                             }
                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
@@ -971,6 +975,51 @@ public class App {
                             System.out.print("]}");
                         }
                     }
+                }
+            }
+
+            //-get-most-liked-posts
+            if (strings[0].equals("-get-most-liked-posts")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    ArrayList<Postare> post = new ArrayList<>();
+
+                    for (Utilizator i : userName) {
+                        post.addAll(i.postare);
+                    }
+
+                    post.sort(Comparator.comparing(Postare::getNrLike).reversed());
+
+                    System.out.print("{'status' : 'ok','message': [");
+                    int conter = 0;
+                    for (Postare i : post) {
+                        if(conter == 0) {
+                            System.out.printf("{'post_id' : '" + i.getId() + "','post_text' : '" + i.text + "', 'post_date' : '" + i.getData() + "', 'username' : " + i.user + ", 'number_of_likes' : '" + i.getNrLike() + "' }");
+                        } else
+                            System.out.printf(",{'post_id' : '" + i.getId() + "','post_text' : '" + i.text + "', 'post_date' : '" + i.getData() + "', 'username' : " + i.user + ", 'number_of_likes' : '" + i.getNrLike() + "' }");
+                        conter++;
+                        if (conter == 5)
+                            break;
+                    }
+                    System.out.print(" ]}");
+                    post.clear();
                 }
             }
         }
