@@ -43,6 +43,9 @@ public class Postare {
     public int getNrLike() {
         return like.size();
     }
+    public int getNrCom() {
+        return comentariu.size();
+    }
 
     public String toString() {
         return super.toString();

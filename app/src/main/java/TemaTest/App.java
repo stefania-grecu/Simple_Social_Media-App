@@ -3,6 +3,8 @@
  */
 package TemaTest;
 
+import com.google.common.net.UrlEscapers;
+
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -613,16 +615,16 @@ public class App {
                             for (Utilizator i : userName) {
                                 if (!i.getNume().equals(user[1])) {
                                     for (Postare j : i.postare) {
-                                        for (Comentariu l : j.comentariu)
-                                            if (j.getId() == index) {
+                                        for (Comentariu l : j.comentariu) {
+                                            if (l.getId() == index) {
                                                 conter = true;
                                                 break;
                                             }
+                                        }
                                     }
                                 }
                             }
                         }
-
                         if (conter) {
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
@@ -631,7 +633,7 @@ public class App {
                                     for (Postare j : i.postare)
                                         for (Comentariu l: j.comentariu)
                                             if (l.getId() == index)
-                                                j.adaugaLike(user[1]);
+                                                l.adaugaLike(user[1]);
                                 }
                             }
                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
@@ -1022,6 +1024,189 @@ public class App {
                     post.clear();
                 }
             }
+
+            //-get-most-commented-posts
+            if (strings[0].equals("-get-most-commented-posts")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    ArrayList<Postare> post = new ArrayList<>();
+
+                    for (Utilizator i : userName) {
+                        post.addAll(i.postare);
+                    }
+
+                    post.sort(Comparator.comparing(Postare::getNrCom).reversed());
+
+                    System.out.print("{'status' : 'ok','message': [");
+                    int conter = 0;
+                    for (Postare i : post) {
+                        if(conter == 0) {
+                            System.out.printf("{'post_id' : '" + i.getId() + "','post_text' : '" + i.text + "', 'post_date' : '" + i.getData() + "', 'username' : " + i.user + ", 'number_of_comments' : '" + i.getNrCom() + "' }");
+                        } else
+                            System.out.printf(",{'post_id' : '" + i.getId() + "','post_text' : '" + i.text + "', 'post_date' : '" + i.getData() + "', 'username' : " + i.user + ", 'number_of_comments' : '" + i.getNrCom() + "' }");
+                        conter++;
+                        if (conter == 5)
+                            break;
+                    }
+                    System.out.print("]}");
+                    post.clear();
+                }
+            }
+
+            //-get-most-followed-users
+            if (strings[0].equals("-get-most-followed-users")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    class Followers {
+                        String user;
+                        int nrFollower;
+                        public Followers(String user, int nrFollower) {
+                            this.user = user;
+                            this.nrFollower = nrFollower;
+                        }
+                        public int getNrFollower() {
+                            return nrFollower;
+                        }
+                    }
+                    ArrayList<Followers> follow = new ArrayList<>();
+                    int nr;
+
+                    for (Utilizator i : userName) {
+                        nr = 0;
+                        for (Utilizator j : userName)
+                            for (String l : j.urmareste)
+                                if (i.getNume().equals(l))
+                                    nr++;
+                        Followers f = new Followers(i.getNume(), nr);
+                        follow.add(f);
+                    }
+
+                    follow.sort(Comparator.comparing(Followers::getNrFollower).reversed());
+
+                    System.out.print("{'status' : 'ok','message': [");
+                    int conter = 0;
+                    for (Followers i : follow) {
+                        if(conter == 0) {
+                            System.out.printf("{'username' : " + i.user + ", 'number_of_followers' : '" + i.getNrFollower() + "' }");
+                        } else
+                            System.out.printf(",{'username' : " + i.user + ", 'number_of_followers' : '" + i.getNrFollower() + "' }");
+                        conter++;
+                        if (conter == 5)
+                            break;
+                    }
+                    System.out.print(" ]}");
+                    follow.clear();
+                }
+            }
+
+            //-get-most-liked-users
+            if (strings[0].equals("-get-most-liked-users")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    class Like {
+                        String user;
+                        int nrLike;
+                        public Like(String user, int nrLike) {
+                            this.user = user;
+                            this.nrLike = nrLike;
+                        }
+                        public int getNrLike() {
+                            return nrLike;
+                        }
+                        public void incrementNrLike() {
+                            nrLike++;
+                        }
+                    }
+
+                    ArrayList<Like> like = new ArrayList<>();
+                    int nr = 0;
+
+                    for (Utilizator i : userName) {
+                        nr = 0;
+                        for (Postare j : i.postare)
+                            nr = nr + j.getNrLike();
+                        for (Utilizator u : userName)
+                            for (Postare p : u.postare)
+                                for (Comentariu c : p.comentariu)
+                                    if (i.getNume().equals(c.getUser()))
+                                        nr = nr + c.getNrLike();
+                        Like l = new Like(i.getNume(), nr);
+                        like.add(l);
+                    }
+
+                    like.sort(Comparator.comparing(Like::getNrLike).reversed());
+
+                    System.out.print("{'status' : 'ok','message': [");
+                    int conter = 0;
+                    for (Like i : like) {
+                        if(conter == 0) {
+                            System.out.printf("{'username' : " + i.user + ", 'number_of_likes' : '" + i.getNrLike() + "' }");
+                        } else
+                            System.out.printf(",{'username' : " + i.user + ", 'number_of_likes' : '" + i.getNrLike() + "' }");
+                        conter++;
+                        if (conter == 5)
+                            break;
+                    }
+                    System.out.print("]}");
+                    like.clear();
+                }
+            }
+
+
+            //System.out.println("Hello wordl!");
+
+
         }
     }
 }
