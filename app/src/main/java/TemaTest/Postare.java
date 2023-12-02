@@ -1,27 +1,31 @@
 package TemaTest;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Postare {
     int id;
-    String text;
+    String text, user;
     ArrayList<Comentariu> comentariu;
     ArrayList<String> like;
-    public Postare(String text) {
-        this.id = 0;
+    DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    Date date = new Date();
+    String currentDateAsString;
+    public Postare(String text, int id, String user) {
+        this.id = id;
         this.text = text;
+        this.user = user;
         comentariu = new ArrayList<>();
         like = new ArrayList<String>();
+        currentDateAsString = dateFormat.format(date);
     }
     public int getId() {
         return id;
     }
-    public void idPostare() {
-        id++;
-    }
 
     public void adaugaComentariu(Comentariu com) {
-        com.idComentariu();
         comentariu.add(com);
     }
     public void stergereComentariu(Comentariu com) {
@@ -32,5 +36,12 @@ public class Postare {
     }
     public void stergeLike(String user) {
         like.remove(user);
+    }
+    public String getData() {
+        return currentDateAsString;
+    }
+
+    public String toString() {
+        return super.toString();
     }
 }

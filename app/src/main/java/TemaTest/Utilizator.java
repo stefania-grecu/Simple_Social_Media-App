@@ -26,7 +26,6 @@ public class Utilizator {
         return password;
     }
     public void adaugaPostare(Postare post) {
-        post.idPostare();
         postare.add(post);
     }
     public void stergerePostare(Postare post) {
