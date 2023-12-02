@@ -40,8 +40,7 @@ public class App {
                     if (j.like != null)
                         j.like.clear();
                 }
-                if (i.postare != null)
-                    i.postare.clear();
+                i.postare.clear();
                 if (i.urmareste != null)
                     i.urmareste.clear();
                 if (i.likePostare != null)
@@ -546,7 +545,7 @@ public class App {
                                 for (Comentariu j : i.comentariu) {
                                     if (j.getId() == index) {
                                         i.stergereComentariu(j);
-                                        System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
+                                        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                                         ok = 1;
                                         break;
                                     }
@@ -738,13 +737,13 @@ public class App {
 
                     post.sort(Comparator.comparing(Postare::getData).reversed().thenComparing(Postare::getId, Comparator.reverseOrder()));
 
-                    System.out.printf("{ 'status' : 'ok', 'message' : [");
+                    System.out.print("{ 'status' : 'ok', 'message' : [");
                     System.out.printf("{'post_id' : '" + post.get(0).getId() + "', 'post_text' : '" + post.get(0).text + "', 'post_date' : '" + post.get(0).getData() + "', 'username' : " + post.get(0).user + "}");
 
                     for (int i = 1; i < post.size(); i++) {
                         System.out.printf(",{'post_id' : '" + post.get(i).getId() + "', 'post_text' : '" + post.get(i).text + "', 'post_date' : '" + post.get(i).getData() + "', 'username' : " + post.get(i).user + "}");
                     }
-                    System.out.printf("]}");
+                    System.out.print("]}");
                     post.clear();
                 }
             }
@@ -792,13 +791,13 @@ public class App {
                         if (ok == 1) {
                             post.sort(Comparator.comparing(Postare::getData).reversed().thenComparing(Postare::getId, Comparator.reverseOrder()));
 
-                            System.out.printf("{ 'status' : 'ok', 'message' : [");
+                            System.out.print("{ 'status' : 'ok', 'message' : [");
                             System.out.printf("{'post_id' : '" + post.get(0).getId() + "', 'post_text' : '" + post.get(0).text + "', 'post_date' : '" + post.get(0).getData() + "'}");
 
                             for (int i = 1; i < post.size(); i++) {
                                 System.out.printf(",{'post_id' : '" + post.get(i).getId() + "', 'post_text' : '" + post.get(i).text + "', 'post_date' : '" + post.get(i).getData() + "'}");
                             }
-                            System.out.printf("]}");
+                            System.out.print("]}");
                         } else {
                             System.out.println("{ 'status' : 'error', 'message' : 'The username to list posts was not valid'}");
                         }
@@ -842,8 +841,10 @@ public class App {
                         for (Utilizator i : userName)
                             if (i.getNume().equals(user[1]))
                                 for (Postare j : i.postare)
-                                    if (j.getId() == index)
+                                    if (j.getId() == index) {
                                         ok = 1;
+                                        break;
+                                    }
 
 
                         if (ok == 1) {
@@ -851,7 +852,7 @@ public class App {
                                 if (i.getNume().equals(user[1]))
                                     for (Postare j : i.postare)
                                         if (j.getId() == index) {
-                                            System.out.printf("{ 'status' : 'ok', 'message' : [");
+                                            System.out.print("{ 'status' : 'ok', 'message' : [");
                                             System.out.printf("{'post_text' : '" + j.text + "', 'post_date' : '" + j.getData() + "', 'username' : " + i.getNume() + ", 'number_of_likes' : '" + j.like.size() + "', 'comments' : [");
                                             com.addAll(j.comentariu);
                                         }
@@ -873,11 +874,102 @@ public class App {
                                 System.out.printf(",{'comment_id' : '" + com.get(x).getId() + "', 'comment_text' : '" + com.get(x).text + "', 'comment_date' : '" + com.get(x).getData() + "', 'username' :" + com.get(x).user + ", 'number_of_likes' : '" + nrLike +"'}");
 
                             }
-                            System.out.printf("] }] }");
+                            System.out.print("] }] }");
                         } else {
                             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
                         }
                         com.clear();
+                    }
+                }
+            }
+
+            //-get-following
+            if (strings[0].equals("-get-following")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    System.out.print("{'status' : 'ok','message': [");
+                    for (Utilizator i : userName)
+                        if (i.getNume().equals(user[1])) {
+                            System.out.printf(i.urmareste.get(0));
+                            for (int x = 1; x < i.urmareste.size(); x++)
+                                System.out.printf("," + i.urmareste.get(x));
+                            System.out.print("]}");
+                        }
+                }
+            }
+
+            //-get-followers
+            if (strings[0].equals("-get-followers")) {
+                user = strings[1].split(" ");
+                password = strings[2].split(" ");
+
+                k = 0;
+
+                try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] nume = new String[2];
+                        nume = line.split(" ");
+                        if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                            k = 1;
+                        }
+                    }
+                } catch (IOException ignored) {
+                }
+                if (k == 0) {
+                    System.out.println("{'status':'error','message':'Login failed'}");
+                } else {
+                    if (strings.length == 3 || !strings[3].startsWith("-username")) {
+                        System.out.println("{'status':'error','message':'No username to list followers was provided'}");
+                    } else {
+                        String[] userFollow = strings[3].split(" ");
+                        ok = 0;
+
+                        try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+                            String line;
+                            while ((line = br.readLine()) != null) {
+                                String[] nume = new String[2];
+                                nume = line.split(" ");
+                                if (nume[0].equals(userFollow[1])) {
+                                    ok = 1;
+                                }
+                            }
+                        } catch (IOException ignored) {
+                        }
+
+                        if (ok == 0)
+                            System.out.println("{'status':'error','message':'The username to list followers was not valid'}");
+                        else {
+                            System.out.print("{'status' : 'ok','message': [");
+                            int conter = 0;
+                            for (Utilizator i : userName)
+                                for (String j : i.urmareste)
+                                    if (j.equals(userFollow[1])) {
+                                        if(conter == 0) {
+                                            conter = 1;
+                                            System.out.printf(i.getNume());
+                                        } else
+                                            System.out.printf("," + i.getNume());
+                                }
+                            System.out.print("]}");
+                        }
                     }
                 }
             }
