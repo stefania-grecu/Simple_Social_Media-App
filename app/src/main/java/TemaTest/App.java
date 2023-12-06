@@ -3,15 +3,9 @@
  */
 package TemaTest;
 
-import com.google.common.net.UrlEscapers;
-
 import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 
 public class App {
     static ArrayList<Utilizator> userName;
@@ -29,6 +23,24 @@ public class App {
     public void adaugaUser(Utilizator user) {
         userName.add(user);
     }
+    private static void cautaFisier(String[] strings) {
+        user = strings[1].split(" ");
+        password = strings[2].split(" ");
+
+        k = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] nume = new String[2];
+                nume = line.split(" ");
+                if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
+                    k = 1;
+                }
+            }
+        } catch (IOException ignored) {
+        }
+    }
 
     public static void main(String[] strings) {
         App app = new App();
@@ -40,14 +52,20 @@ public class App {
             //-cleanup-all
             if (strings[0].equals("-cleanup-all")) {
                 for (Utilizator i : userName) {
-                    for (Postare j : i.postare) {
-                        if (j.comentariu != null)
-                            j.comentariu.clear();
-                        if (j.like != null)
-                            j.like.clear();
-                    }
-                    if (i.postare != null)
+                    if (i.postare != null) {
+                        for (Postare j : i.postare) {
+                            if (j.comentariu != null) {
+                                for (Comentariu l : j.comentariu) {
+                                    if (l.like != null)
+                                        l.like.clear();
+                                }
+                                j.comentariu.clear();
+                            }
+                            if (j.like != null)
+                                j.like.clear();
+                        }
                         i.postare.clear();
+                    }
                     if (i.urmareste != null)
                         i.urmareste.clear();
                     if (i.likePostare != null)
@@ -60,10 +78,10 @@ public class App {
                 if (userName != null)
                     userName.clear();
 
-                //oldId = Integer.parseInt(null);
                 idComentariu = 0;
                 idPostare = 0;
 
+                //stergere fisier
                 File myFile = new File("user.csv");
                 if (myFile.delete())
                     System.out.println("{ 'status' : 'ok', 'message' : 'Cleanup finished successfully'}");
@@ -71,47 +89,27 @@ public class App {
 
             //-create-user
             if (strings[0].equals("-create-user")) {
-                if (strings.length == 1) {
+                if (strings.length == 1 || !strings[1].startsWith("-u")) {
                     System.out.println("{'status':'error','message':'Please provide username'}");
-                } else if (strings.length == 2) {
+                } else if (strings.length == 2 || !strings[2].startsWith("-p")) {
                     System.out.println("{'status':'error','message':'Please provide password'}");
                 } else {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    if (!strings[1].startsWith("-u")) {
-                        System.out.println("{'status':'error','message':'Please provide username'}");
+                    cautaFisier(strings);
+                    if (k == 1) {
+                        System.out.println("{'status':'error','message':'User already exists'}");
                     } else {
-                        if (!strings[2].startsWith("-p")) {
-                            System.out.println("{'status':'error','message':'Please provide password'}");
-                        } else {
-                            int k = 0;
-                            try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                                String line;
-                                while ((line = br.readLine()) != null) {
-                                    nume = line.split(" ");
-                                    if (nume[0].equals(user[1])) {
-                                        k = 1;
-                                    }
-                                }
-                            } catch (IOException e) {
-                                k = 0;
-                            }
-                            if (k == 1) {
-                                System.out.println("{'status':'error','message':'User already exists'}");
-                            } else {
-                                Utilizator utilizator = new Utilizator(user[1], password[1]);
-                                app.adaugaUser(utilizator);
+                        //creaza uutilizatorul
+                        Utilizator utilizator = new Utilizator(user[1], password[1]);
+                        app.adaugaUser(utilizator);
 
-                                try (FileWriter fw = new FileWriter("user.csv", true);
-                                     BufferedWriter bw = new BufferedWriter(fw);
-                                     PrintWriter out = new PrintWriter(bw)) {
-                                    out.println(user[1] + " " + password[1]);
-                                } catch (IOException ignored) {
-                                }
-                                System.out.println("{'status':'ok','message':'User created successfully'}");
-                            }
+                        //adauga in fisier
+                        try (FileWriter fw = new FileWriter("user.csv", true);
+                             BufferedWriter bw = new BufferedWriter(fw);
+                             PrintWriter out = new PrintWriter(bw)) {
+                            out.println(user[1] + " " + password[1]);
+                        } catch (IOException ignored) {
                         }
+                        System.out.println("{'status':'ok','message':'User created successfully'}");
                     }
                 }
             } else if (strings.length <= 2 || !strings[1].startsWith("-u") || !strings[2].startsWith("-p"))
@@ -120,22 +118,8 @@ public class App {
 
                 //-create-post
                 if (strings[0].equals("-create-post")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -148,6 +132,7 @@ public class App {
                             if (text[1].length() > 300) {
                                 System.out.println("{'status':'error','message':'Post text length exceeded'}");
                             } else {
+                                //crearea efectiva a postarii si adaugarea userului cu care s-a autentificat
                                 for (Utilizator i : userName)
                                     if (i.getNume().equals(user[1])) {
                                         Postare post = new Postare(text[1], ++idPostare, user[1]);
@@ -161,22 +146,8 @@ public class App {
 
                 //delete-post-by-id
                 if (strings[0].equals("-delete-post-by-id")) {
-                    String[] user = strings[1].split(" ");
-                    String[] password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -191,9 +162,10 @@ public class App {
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     for (Postare j : i.postare) {
+                                        //transformarea id-ului din string in int
                                         int index = Integer.parseInt(id[1]);
-                                        //System.out.println(index);
 
+                                        //daca am gasit id postarii o stergem din lista de postari
                                         if (j.getId() == index) {
                                             i.stergerePostare(j);
                                             System.out.println("{'status':'ok','message':'Post deleted successfully'}");
@@ -211,22 +183,8 @@ public class App {
 
                 //-follow-user-by-username
                 if (strings[0].equals("-follow-user-by-username")) {
-                    String[] user = strings[1].split(" ");
-                    String[] password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -236,6 +194,7 @@ public class App {
                             String[] userFollow = strings[3].split(" ");
                             ok = 0;
 
+                            //cautarea in fisier a userului pe care vrea sa-l urmareasca
                             try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                                 String line;
                                 while ((line = br.readLine()) != null) {
@@ -248,6 +207,7 @@ public class App {
                             } catch (IOException ignored) {
                             }
 
+                            //verificare daca il urmareste deja
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     for (String j : i.urmareste) {
@@ -261,6 +221,7 @@ public class App {
                             if (ok == 0)
                                 System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
                             else {
+                                //adaugarea in lista urmareste a userului autentificat
                                 for (Utilizator i : userName) {
                                     if (i.getNume().equals(user[1])) {
                                         i.adaugaUrmareste(userFollow[1]);
@@ -274,24 +235,8 @@ public class App {
 
                 //-unfollow-user-by-username
                 if (strings[0].equals("-unfollow-user-by-username")) {
-                    String[] user = new String[2];
-                    user = strings[1].split(" ");
-                    String[] password = new String[2];
-                    password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    int k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -304,6 +249,7 @@ public class App {
                             int ok = 0;
                             boolean contor = false;
 
+                            //cauta in fisier userul pe care nu vreau sa-l mai urmaresc
                             try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                                 String line;
                                 while ((line = br.readLine()) != null) {
@@ -316,6 +262,7 @@ public class App {
                             } catch (IOException ignored) {
                             }
 
+                            //cauta username-ul in lista urmareste si il sterge daca il gaseste
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     for (String j : i.urmareste) {
@@ -336,22 +283,8 @@ public class App {
 
                 //-like-post
                 if (strings[0].equals("-like-post")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -366,12 +299,14 @@ public class App {
 
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
+                                    //verifica daca este postarea utilizatorului autentificat
                                     for (Postare j : i.postare) {
                                         if (j.getId() == index) {
                                             ok = 1;
                                             break;
                                         }
                                     }
+                                    //verifica daca a dat deja like la ea
                                     for (String j : i.likePostare) {
                                         if (j.equals(id[1])) {
                                             ok = 1;
@@ -382,6 +317,7 @@ public class App {
                             }
                             Postare post = null;
                             if (ok == 0) {
+                                //verifica daca id-ul postarii exista
                                 for (Utilizator i : userName) {
                                     if (!i.getNume().equals(user[1])) {
                                         for (Postare j : i.postare) {
@@ -396,6 +332,7 @@ public class App {
                             }
 
                             if (conter) {
+                                //adauga like la postare
                                 for (Utilizator i : userName) {
                                     if (i.getNume().equals(user[1])) {
                                         i.adaugaLikePostare(id[1]);
@@ -412,22 +349,7 @@ public class App {
 
                 //-unlike-post
                 if (strings[0].equals("-unlike-post")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -435,13 +357,22 @@ public class App {
                             System.out.println("{'status':'error','message':'No post identifier to unlike was provided'}");
                         } else {
                             String[] id = strings[3].split(" ");
+                            String[] idInt = id[1].split("'");
+                            int index = Integer.parseInt(idInt[1]);
                             ok = 0;
 
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     for (String j : i.likePostare) {
+                                        //verifica daca a dat like la postare
                                         if (j.equals(id[1])) {
+                                            //strege like-ul de la postare
                                             i.stergereLikePostare(id[1]);
+                                            for (Utilizator u : userName)
+                                                for (Postare p : u.postare)
+                                                    if (p.getId() == index)
+                                                        //sterge username-ul personei care a dat like
+                                                        p.stergeLike(user[1]);
                                             ok = 1;
                                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                                             break;
@@ -458,24 +389,8 @@ public class App {
 
                 //-comment-post
                 if (strings[0].equals("-comment-post")) {
-                    String[] user = new String[2];
-                    user = strings[1].split(" ");
-                    String[] password = new String[2];
-                    password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    int k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -493,9 +408,12 @@ public class App {
 
                                 for (Utilizator i : userName)
                                     for (Postare j : i.postare)
+                                        //verifica daca gaseste id-ul postarii
                                         if (j.getId() == index) {
+                                            //adauga comentariu la postare
                                             Comentariu com = new Comentariu(text[1], ++idComentariu, user[1]);
                                             j.adaugaComentariu(com);
+                                            //adauga la user comentariul creat
                                             for (Utilizator l : userName)
                                                 if (l.getNume().equals(user[1]))
                                                     l.adaugaComentariu(com);
@@ -503,32 +421,14 @@ public class App {
                                             break;
                                         }
                             }
-
-
                         }
                     }
                 }
 
                 //-delete-comment-by-id
                 if (strings[0].equals("-delete-comment-by-id")) {
-                    String[] user = new String[2];
-                    user = strings[1].split(" ");
-                    String[] password = new String[2];
-                    password = strings[2].split(" ");
+                    cautaFisier(strings);
 
-                    int k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -545,6 +445,11 @@ public class App {
                                     for (Postare j : i.postare) {
                                         for (Comentariu l : j.comentariu) {
                                             if (l.getId() == index) {
+                                                for (Utilizator u : userName)
+                                                    for (Postare p : u.postare)
+                                                        for (Comentariu c : p.comentariu)
+                                                            if (c.getId() == index)
+                                                                u.stergereComentariu(c);
                                                 j.stergereComentariu(l);
                                                 System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
                                                 ok = 1;
@@ -554,6 +459,12 @@ public class App {
                                     }
                                     for (Comentariu j : i.comentariu) {
                                         if (j.getId() == index) {
+                                            for (Utilizator u : userName)
+                                                if (!i.getNume().equals(user[1]))
+                                                    for (Postare p : u.postare)
+                                                        for (Comentariu c : p.comentariu)
+                                                            if (c.getId() == index)
+                                                                p.stergereComentariu(c);
                                             i.stergereComentariu(j);
                                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                                             ok = 1;
@@ -571,22 +482,7 @@ public class App {
 
                 //-like-comment
                 if (strings[0].equals("-like-comment")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -650,22 +546,7 @@ public class App {
 
                 //-unlike-comment
                 if (strings[0].equals("-unlike-comment")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -681,13 +562,13 @@ public class App {
                                 if (i.getNume().equals(user[1])) {
                                     for (String j : i.likeComentariu) {
                                         if (j.equals(id[1])) {
-                                            i.stergereLikeComentariu(id[1]);
                                             for (Utilizator u : userName)
                                                 if (!u.getNume().equals(user[1]))
                                                     for (Postare t : u.postare)
                                                         for (Comentariu v : t.comentariu)
                                                             if (v.getId() == index)
-                                                                t.stergeLike(user[1]);
+                                                                v.stergeLike(user[1]);
+                                            i.stergereLikeComentariu(id[1]);
                                             ok = 1;
                                             System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
                                             break;
@@ -704,22 +585,7 @@ public class App {
 
                 //-get-followings-posts
                 if (strings[0].equals("-get-followings-posts")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -732,18 +598,6 @@ public class App {
                                             post.addAll(l.postare);
                                         }
                                 }
-
-                        //sortarea arraylist-ului dupa data
-//                    post.sort(new Comparator<Postare>() {
-//                        @Override
-//                        public int compare(Postare postare1, Postare postare2) {
-//                            int comparatie = postare2.getData().compareTo(postare1.getData());
-//                            if (comparatie == 0) {
-//                                return postare2.getId().compareTo(postare1.getId());
-//                            }
-//                            return comparatie;
-//                        }
-//                    });
 
                         post.sort(Comparator.comparing(Postare::getData).reversed().thenComparing(Postare::getId, Comparator.reverseOrder()));
 
@@ -760,22 +614,7 @@ public class App {
 
                 //-get-user-posts
                 if (strings[0].equals("-get-user-posts")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -818,22 +657,7 @@ public class App {
 
                 //-get-post-details
                 if (strings[0].equals("-get-post-details")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -868,21 +692,10 @@ public class App {
                                             }
 
                                 com.sort(Comparator.comparing(Comentariu::getData).reversed().thenComparing(Comentariu::getId, Comparator.reverseOrder()));
-                                int nrLike = 0;
-                                for (Utilizator i : userName)
-                                    for (String j : i.likeComentariu)
-                                        if (j.equals(com.get(0).getId()))
-                                            nrLike++;
 
-                                System.out.printf("{'comment_id' : '" + com.get(0).getId() + "', 'comment_text' : '" + com.get(0).text + "', 'comment_date' : '" + com.get(0).getData() + "', 'username' :" + com.get(0).user + ", 'number_of_likes' : '" + nrLike + "'}");
+                                System.out.printf("{'comment_id' : '" + com.get(0).getId() + "', 'comment_text' : '" + com.get(0).text + "', 'comment_date' : '" + com.get(0).getData() + "', 'username' :" + com.get(0).user + ", 'number_of_likes' : '" + com.get(0).getNrLike() + "'}");
                                 for (int x = 1; x < com.size(); x++) {
-                                    nrLike = 0;
-                                    for (Utilizator i : userName)
-                                        for (String j : i.likeComentariu)
-                                            if (j.equals(com.get(x).getId()))
-                                                nrLike++;
-                                    System.out.printf(",{'comment_id' : '" + com.get(x).getId() + "', 'comment_text' : '" + com.get(x).text + "', 'comment_date' : '" + com.get(x).getData() + "', 'username' :" + com.get(x).user + ", 'number_of_likes' : '" + nrLike + "'}");
-
+                                    System.out.printf(",{'comment_id' : '" + com.get(x).getId() + "', 'comment_text' : '" + com.get(x).text + "', 'comment_date' : '" + com.get(x).getData() + "', 'username' :" + com.get(x).user + ", 'number_of_likes' : '" + com.get(x).getNrLike() + "'}");
                                 }
                                 System.out.print("] }] }");
                             } else {
@@ -895,22 +708,7 @@ public class App {
 
                 //-get-following
                 if (strings[0].equals("-get-following")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -927,22 +725,7 @@ public class App {
 
                 //-get-followers
                 if (strings[0].equals("-get-followers")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -986,22 +769,7 @@ public class App {
 
                 //-get-most-liked-posts
                 if (strings[0].equals("-get-most-liked-posts")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -1031,22 +799,7 @@ public class App {
 
                 //-get-most-commented-posts
                 if (strings[0].equals("-get-most-commented-posts")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -1076,22 +829,7 @@ public class App {
 
                 //-get-most-followed-users
                 if (strings[0].equals("-get-most-followed-users")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -1141,22 +879,7 @@ public class App {
 
                 //-get-most-liked-users
                 if (strings[0].equals("-get-most-liked-users")) {
-                    user = strings[1].split(" ");
-                    password = strings[2].split(" ");
-
-                    k = 0;
-
-                    try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            String[] nume = new String[2];
-                            nume = line.split(" ");
-                            if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
-                                k = 1;
-                            }
-                        }
-                    } catch (IOException ignored) {
-                    }
+                    cautaFisier(strings);
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -1171,10 +894,6 @@ public class App {
 
                             public int getNrLike() {
                                 return nrLike;
-                            }
-
-                            public void incrementNrLike() {
-                                nrLike++;
                             }
                         }
 

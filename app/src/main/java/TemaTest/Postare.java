@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Postare {
+public class Postare implements Likeable{
     int id;
     String text, user;
     ArrayList<Comentariu> comentariu;
@@ -45,9 +45,5 @@ public class Postare {
     }
     public int getNrCom() {
         return comentariu.size();
-    }
-
-    public String toString() {
-        return super.toString();
     }
 }

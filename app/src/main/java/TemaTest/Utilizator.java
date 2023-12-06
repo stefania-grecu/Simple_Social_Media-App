@@ -3,7 +3,8 @@ package TemaTest;
 import java.util.ArrayList;
 
 public class Utilizator {
-    private String user, password;
+    private final String user;
+    private final String password;
     ArrayList<Postare> postare;
     ArrayList<String> urmareste;
     ArrayList<String> likePostare, likeComentariu;
