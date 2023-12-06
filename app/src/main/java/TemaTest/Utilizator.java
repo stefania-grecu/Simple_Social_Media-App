@@ -13,19 +13,19 @@ public class Utilizator {
     public Utilizator(String user, String password) {
         this.user = user;
         this.password = password;
-        postare = new ArrayList<Postare>();
-        urmareste = new ArrayList<String>();
-        likePostare = new ArrayList<String>();
-        likeComentariu = new ArrayList<String>();
-        comentariu = new ArrayList<Comentariu>();
+        postare = new ArrayList<>();
+        urmareste = new ArrayList<>();
+        likePostare = new ArrayList<>();
+        likeComentariu = new ArrayList<>();
+        comentariu = new ArrayList<>();
 
     }
     public String getNume() {
         return user;
     }
-    public String getPassword() {
-        return password;
-    }
+//    public String getPassword() {
+//        return password;
+//    }
     public void adaugaPostare(Postare post) {
         postare.add(post);
     }

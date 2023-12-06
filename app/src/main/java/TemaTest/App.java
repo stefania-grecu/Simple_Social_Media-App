@@ -29,10 +29,10 @@ public class App {
 
         k = 0;
 
+        //cautarea efectiva in fisier
         try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] nume = new String[2];
                 nume = line.split(" ");
                 if (nume[0].equals(user[1]) && nume[1].equals(password[1])) {
                     k = 1;
@@ -126,7 +126,7 @@ public class App {
                         if (strings.length == 3 || !strings[3].startsWith("-text")) {
                             System.out.println("{'status':'error','message':'No text provided'}");
                         } else {
-                            String[] text = new String[2];
+                            String[] text;
                             text = strings[3].split("'");
 
                             if (text[1].length() > 300) {
@@ -154,7 +154,7 @@ public class App {
                         if (strings.length == 3 || !strings[3].startsWith("-id")) {
                             System.out.println("{'status':'error','message':'No identifier was provided'}");
                         } else {
-                            String[] id = new String[2];
+                            String[] id;
                             id = strings[3].split("'");
 
                             ok = 0;
@@ -198,7 +198,6 @@ public class App {
                             try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                                 String line;
                                 while ((line = br.readLine()) != null) {
-                                    String[] nume = new String[2];
                                     nume = line.split(" ");
                                     if (nume[0].equals(userFollow[1])) {
                                         ok = 1;
@@ -243,17 +242,16 @@ public class App {
                         if (strings.length == 3 || !strings[3].startsWith("-username")) {
                             System.out.println("{'status':'error','message':'No username to unfollow was provided'}");
                         } else {
-                            String[] userUnfollow = new String[2];
+                            String[] userUnfollow;
                             userUnfollow = strings[3].split(" ");
 
-                            int ok = 0;
+                            ok = 0;
                             boolean contor = false;
 
                             //cauta in fisier userul pe care nu vreau sa-l mai urmaresc
                             try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                                 String line;
                                 while ((line = br.readLine()) != null) {
-                                    String[] nume = new String[2];
                                     nume = line.split(" ");
                                     if (nume[0].equals(userUnfollow[1])) {
                                         ok = 1;
@@ -442,6 +440,7 @@ public class App {
 
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
+                                    //sterge comentariu de la orice postare de a lui daca gaseste id
                                     for (Postare j : i.postare) {
                                         for (Comentariu l : j.comentariu) {
                                             if (l.getId() == index) {
@@ -457,6 +456,7 @@ public class App {
                                             }
                                         }
                                     }
+                                    //strege comentariu creat de el daca ii gaseste id
                                     for (Comentariu j : i.comentariu) {
                                         if (j.getId() == index) {
                                             for (Utilizator u : userName)
@@ -473,7 +473,6 @@ public class App {
                                     }
                                 }
                             }
-
                             if (ok == 0)
                                 System.out.println("{'status':'error','message':'The identifier was not valid'}");
                         }
@@ -483,6 +482,7 @@ public class App {
                 //-like-comment
                 if (strings[0].equals("-like-comment")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -495,6 +495,7 @@ public class App {
                             int index = Integer.parseInt(idInt[1]);
                             boolean conter = false;
 
+                            //se verifica daca e comentariu creat de el sau i-a dat deja like
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     for (Comentariu j : i.comentariu) {
@@ -512,6 +513,7 @@ public class App {
                                 }
                             }
                             if (ok == 0) {
+                                //daca nu se verifica daca exista comentariu cu acel id
                                 for (Utilizator i : userName) {
                                     if (!i.getNume().equals(user[1])) {
                                         for (Postare j : i.postare) {
@@ -526,6 +528,7 @@ public class App {
                                 }
                             }
                             if (conter) {
+                                //se cauta comentariu dupa id si se adauga id in lista de like a userului si userul in lista de like a comentariului
                                 for (Utilizator i : userName) {
                                     if (i.getNume().equals(user[1])) {
                                         i.adaugaLikeComentariu(id[1]);
@@ -547,6 +550,7 @@ public class App {
                 //-unlike-comment
                 if (strings[0].equals("-unlike-comment")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -558,6 +562,7 @@ public class App {
                             int index = Integer.parseInt(idInt[1]);
                             ok = 0;
 
+                            //se verifica daca a dat like la comentariu si in caz afirmativ se sterge userul din lista de likeuri a comentariului si id din lista de la utilizator
                             for (Utilizator i : userName) {
                                 if (i.getNume().equals(user[1])) {
                                     for (String j : i.likeComentariu) {
@@ -586,10 +591,12 @@ public class App {
                 //-get-followings-posts
                 if (strings[0].equals("-get-followings-posts")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
-                        ArrayList<Postare> post = new ArrayList<Postare>();
+                        ArrayList<Postare> post = new ArrayList<>();
+                        //adaugam in post toate postarile persoanelor pe care userul autentificat le urmareste
                         for (Utilizator i : userName)
                             if (i.getNume().equals(user[1]))
                                 for (String j : i.urmareste) {
@@ -599,8 +606,10 @@ public class App {
                                         }
                                 }
 
+                        //sortare descrescator dupa data si dupa id
                         post.sort(Comparator.comparing(Postare::getData).reversed().thenComparing(Postare::getId, Comparator.reverseOrder()));
 
+                        //afisare conform cerintei
                         System.out.print("{ 'status' : 'ok', 'message' : [");
                         System.out.printf("{'post_id' : '" + post.get(0).getId() + "', 'post_text' : '" + post.get(0).text + "', 'post_date' : '" + post.get(0).getData() + "', 'username' : " + post.get(0).user + "}");
 
@@ -615,18 +624,20 @@ public class App {
                 //-get-user-posts
                 if (strings[0].equals("-get-user-posts")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
                         if (strings.length == 3 || !strings[3].startsWith("-username")) {
                             System.out.println("{'status':'error','message':'No username to list posts was provided'}");
                         } else {
-                            String[] userFollow = new String[2];
+                            String[] userFollow;
                             userFollow = strings[3].split(" ");
 
                             int ok = 0;
-                            ArrayList<Postare> post = new ArrayList<Postare>();
+                            ArrayList<Postare> post = new ArrayList<>();
 
+                            //adaugam in post postarile username-ului doar daca userul autentificat il urmareste
                             for (Utilizator i : userName)
                                 if (i.getNume().equals(user[1]))
                                     for (String j : i.urmareste)
@@ -638,8 +649,10 @@ public class App {
                                                 }
 
                             if (ok == 1) {
+                                //ordonare descrescator dupa data si id
                                 post.sort(Comparator.comparing(Postare::getData).reversed().thenComparing(Postare::getId, Comparator.reverseOrder()));
 
+                                //afisare conform cerintei
                                 System.out.print("{ 'status' : 'ok', 'message' : [");
                                 System.out.printf("{'post_id' : '" + post.get(0).getId() + "', 'post_text' : '" + post.get(0).text + "', 'post_date' : '" + post.get(0).getData() + "'}");
 
@@ -658,20 +671,22 @@ public class App {
                 //-get-post-details
                 if (strings[0].equals("-get-post-details")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
                         if (strings.length == 3 || !strings[3].startsWith("-post-id")) {
                             System.out.println("{'status':'error','message':'No post identifier was provided'}");
                         } else {
-                            String[] id = new String[2];
+                            String[] id;
                             id = strings[3].split(" ");
 
                             int ok = 0;
-                            ArrayList<Comentariu> com = new ArrayList<Comentariu>();
+                            ArrayList<Comentariu> com = new ArrayList<>();
                             String[] idInt = id[1].split("'");
                             int index = Integer.parseInt(idInt[1]);
 
+                            //verificam daca exista id-ul postarii
                             for (Utilizator i : userName)
                                 if (i.getNume().equals(user[1]))
                                     for (Postare j : i.postare)
@@ -682,6 +697,7 @@ public class App {
 
 
                             if (ok == 1) {
+                                //daca exista adaugam in lista com toate comentariile postarii
                                 for (Utilizator i : userName)
                                     if (i.getNume().equals(user[1]))
                                         for (Postare j : i.postare)
@@ -691,6 +707,7 @@ public class App {
                                                 com.addAll(j.comentariu);
                                             }
 
+                                //sortare descrescator dupa data si id
                                 com.sort(Comparator.comparing(Comentariu::getData).reversed().thenComparing(Comentariu::getId, Comparator.reverseOrder()));
 
                                 System.out.printf("{'comment_id' : '" + com.get(0).getId() + "', 'comment_text' : '" + com.get(0).text + "', 'comment_date' : '" + com.get(0).getData() + "', 'username' :" + com.get(0).user + ", 'number_of_likes' : '" + com.get(0).getNrLike() + "'}");
@@ -709,9 +726,11 @@ public class App {
                 //-get-following
                 if (strings[0].equals("-get-following")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
+                        //afisam conform cerintei persoanele pe care userul autentificat le urmareste
                         System.out.print("{'status' : 'ok','message': [");
                         for (Utilizator i : userName)
                             if (i.getNume().equals(user[1])) {
@@ -726,6 +745,7 @@ public class App {
                 //-get-followers
                 if (strings[0].equals("-get-followers")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
@@ -738,7 +758,6 @@ public class App {
                             try (BufferedReader br = new BufferedReader(new FileReader("user.csv"))) {
                                 String line;
                                 while ((line = br.readLine()) != null) {
-                                    String[] nume = new String[2];
                                     nume = line.split(" ");
                                     if (nume[0].equals(userFollow[1])) {
                                         ok = 1;
@@ -752,6 +771,8 @@ public class App {
                             else {
                                 System.out.print("{'status' : 'ok','message': [");
                                 int conter = 0;
+                                //cautam la toti utilizatorii username-ul primit la parametru
+                                //si ii afisam conform cerintei
                                 for (Utilizator i : userName)
                                     for (String j : i.urmareste)
                                         if (j.equals(userFollow[1])) {
@@ -770,17 +791,21 @@ public class App {
                 //-get-most-liked-posts
                 if (strings[0].equals("-get-most-liked-posts")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
                         ArrayList<Postare> post = new ArrayList<>();
 
+                        //adaugam toate postarile in lista
                         for (Utilizator i : userName) {
                             post.addAll(i.postare);
                         }
 
+                        //le ordonam descrescator dupa nr de likeuri
                         post.sort(Comparator.comparing(Postare::getNrLike).reversed());
 
+                        //afisam doar primele 5 postari conform cerintei
                         System.out.print("{'status' : 'ok','message': [");
                         int conter = 0;
                         for (Postare i : post) {
@@ -800,17 +825,21 @@ public class App {
                 //-get-most-commented-posts
                 if (strings[0].equals("-get-most-commented-posts")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
                         ArrayList<Postare> post = new ArrayList<>();
 
+                        //adaugam toate postarile in lista post
                         for (Utilizator i : userName) {
                             post.addAll(i.postare);
                         }
 
+                        //le ordonam descrescator dupa numarul de comentarii
                         post.sort(Comparator.comparing(Postare::getNrCom).reversed());
 
+                        //le afisam doar pe primele 5 conform cerintei
                         System.out.print("{'status' : 'ok','message': [");
                         int conter = 0;
                         for (Postare i : post) {
@@ -830,12 +859,14 @@ public class App {
                 //-get-most-followed-users
                 if (strings[0].equals("-get-most-followed-users")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
+                        //cream o clasa interna in care se retine userul si nr de followers
                         class Followers {
-                            String user;
-                            int nrFollower;
+                            final String user;
+                            final int nrFollower;
 
                             public Followers(String user, int nrFollower) {
                                 this.user = user;
@@ -854,13 +885,17 @@ public class App {
                             for (Utilizator j : userName)
                                 for (String l : j.urmareste)
                                     if (i.getNume().equals(l))
+                                        //plusam nr doar daca gasim o persoana care o urmareste
                                         nr++;
+                            //adaugam in lista de tip Followers
                             Followers f = new Followers(i.getNume(), nr);
                             follow.add(f);
                         }
 
+                        //sortam descrescator dupa nr de followers
                         follow.sort(Comparator.comparing(Followers::getNrFollower).reversed());
 
+                        //ii afisam doar pe primii 5 conform cerintei
                         System.out.print("{'status' : 'ok','message': [");
                         int conter = 0;
                         for (Followers i : follow) {
@@ -880,12 +915,14 @@ public class App {
                 //-get-most-liked-users
                 if (strings[0].equals("-get-most-liked-users")) {
                     cautaFisier(strings);
+
                     if (k == 0) {
                         System.out.println("{'status':'error','message':'Login failed'}");
                     } else {
+                        //cream o clasa interna in care sa retinem userul si numarul de likeuri de pe postarile si comentariile create
                         class Like {
-                            String user;
-                            int nrLike;
+                            public final String user;
+                            final int nrLike;
 
                             public Like(String user, int nrLike) {
                                 this.user = user;
@@ -898,23 +935,28 @@ public class App {
                         }
 
                         ArrayList<Like> like = new ArrayList<>();
-                        int nr = 0;
+                        int nr;
 
                         for (Utilizator i : userName) {
                             nr = 0;
+                            //adaugam la nr numarul de like primite la toate postarile
                             for (Postare j : i.postare)
                                 nr = nr + j.getNrLike();
+                            //cautam comentariile create si adaugam la nr numarul de likeuri primite
                             for (Utilizator u : userName)
                                 for (Postare p : u.postare)
                                     for (Comentariu c : p.comentariu)
                                         if (i.getNume().equals(c.getUser()))
                                             nr = nr + c.getNrLike();
+                            //adaugam la lista de tip Like
                             Like l = new Like(i.getNume(), nr);
                             like.add(l);
                         }
 
+                        //ordonare descrescator dupa numarul total de likeuri primite
                         like.sort(Comparator.comparing(Like::getNrLike).reversed());
 
+                        //afisare conform cerintei doar a primilor 5
                         System.out.print("{'status' : 'ok','message': [");
                         int conter = 0;
                         for (Like i : like) {
@@ -930,7 +972,6 @@ public class App {
                         like.clear();
                     }
                 }
-
             }
         }
     }

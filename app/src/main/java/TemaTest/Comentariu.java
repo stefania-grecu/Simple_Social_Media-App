@@ -25,19 +25,15 @@ public class Comentariu implements Likeable {
     public int getId() {
         return id;
     }
-
     public String getData() {
         return currentDateAsString;
     }
-
     public String getUser() {
         return user;
     }
-
     public void adaugaLike(String user) {
         like.add(user);
     }
-
     public void stergeLike(String user) {
         like.remove(user);
     }

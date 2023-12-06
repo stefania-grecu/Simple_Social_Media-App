@@ -18,13 +18,12 @@ public class Postare implements Likeable{
         this.text = text;
         this.user = user;
         comentariu = new ArrayList<>();
-        like = new ArrayList<String>();
+        like = new ArrayList<>();
         currentDateAsString = dateFormat.format(date);
     }
     public int getId() {
         return id;
     }
-
     public void adaugaComentariu(Comentariu com) {
         comentariu.add(com);
     }
