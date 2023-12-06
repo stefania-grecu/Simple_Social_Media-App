@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Comentariu implements Likeable {
-    int id;
+    private final int id;
     String text, user;
     AbstractList<String> like;
     DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");

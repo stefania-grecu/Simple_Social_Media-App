@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Postare implements Likeable{
-    int id;
+    private final int id;
     String text, user;
     ArrayList<Comentariu> comentariu;
     ArrayList<String> like;
