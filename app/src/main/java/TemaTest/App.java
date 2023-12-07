@@ -633,7 +633,6 @@ public class App {
                         } else {
                             String[] userFollow;
                             userFollow = strings[3].split(" ");
-
                             int ok = 0;
                             ArrayList<Postare> post = new ArrayList<>();
 
